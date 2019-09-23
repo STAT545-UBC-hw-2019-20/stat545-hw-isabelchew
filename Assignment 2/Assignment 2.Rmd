@@ -2,10 +2,9 @@
 title: "Assignment 2"
 author: "Isabel"
 date: "9/19/2019"
-output: html_document
+output: pdf_document
+always_allow_html: yes
 ---
-
-<!---The following chunk allows errors when knitting--->
 
 ```{r allow errors, echo = FALSE}
 knitr::opts_chunk$set(error = TRUE)
@@ -17,7 +16,6 @@ First, load the `gapminder` and `tidyverse` packages. The `dplyr` package will b
 suppressPackageStartupMessages(library(gapminder))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(DT))
-# load your packages here:
 
 ```
 
