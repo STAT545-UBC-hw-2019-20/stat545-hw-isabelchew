@@ -1,0 +1,58 @@
+---
+title: "Assignment 2"
+author: "Isabel"
+date: "9/19/2019"
+output: html_document
+---
+
+<!---The following chunk allows errors when knitting--->
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+First, load the `gapminder` and `tidyverse` packages. The `dplyr` package will be loaded via the `tidyverse` package. 
+
+```{r load packages, warning = FALSE, message = FALSE}
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(DT))
+# load your packages here:
+
+```
+
+Let's first have an overview of the data:
+
+```{r}
+datatable(as_tibble(gapminder))
+```
+
+Let's now focus on the following three countries: Singapore, Malaysia and Indonesia:
+
+```{r}
+filtered<-gapminder%>%
+  filter(year>1969 & year<1980)%>%
+  filter(country %in% c('Singapore', 'Malaysia', 'Indonesia'))
+  
+print(filtered)
+  
+```
+
+We now only want the columns 'country' and 'gdpPercap' from the above dataset: 
+
+```{r}
+
+filtered%>%
+  select(country, gdpPercap)
+
+```
+
+We want to see which countries have experienced a drop in life expectancy between 2007 and 1952: 
+
+```{r}
+gapminder%>%
+  mutate(difference=lifeExp-lag(lifeExp, 1))%>%
+  filter(country if difference<0)
+
+```
+
