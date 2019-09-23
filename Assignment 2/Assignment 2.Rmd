@@ -8,6 +8,7 @@ always_allow_html: yes
 
 ```{r allow errors, echo = FALSE}
 knitr::opts_chunk$set(error = TRUE)
+
 ```
 
 First, load the `gapminder` and `tidyverse` packages. The `dplyr` package will be loaded via the `tidyverse` package. 
@@ -47,15 +48,34 @@ filtered%>%
 
 ```
 
-We want to see which countries have experienced a drop in life expectancy: 
+\newpage
+
+We want to see which countries have experienced a drop in life expectancy. 
+
+Here, in my code, I filter out the rows for year=1952 because these reflect the difference between _two_ countries' life expectancies. However, we only want to compare within-country differences.
+
+From the data, we can see that the biggest drop in life expectancy occured in Rwanda between 1987 and 1992. On the converse, we can see that the biggest increase in life expectancy occured in Cambodia between 1977 and 1982. These results are not surprising, given that both countries experienced devastating genocides during those time periods.  
 
 ```{r}
-gapminder%>%
-  mutate(difference=lifeExp-lag(lifeExp, 1))%>%
+gapminder_mutated<-
+  gapminder%>%
+  mutate(difference=lifeExp-lag(lifeExp, 1))
+
+gapminder_mutated%>%
   filter(difference<0)%>%
-  filter(year!=1952) # Here I filter out those rows for year=1952 because these do not capture the difference in life expectancy for the same country. 
+  filter(year!=1952) 
+
+gapminder_mutated%>%
+    filter(year!=1952)%>% 
+  filter(difference==min(difference))
+
+gapminder_mutated%>%
+    filter(year!=1952)%>% 
+  filter(difference==max(difference))
 
 ```
+
+\newpage
 
 The following shows the maximum GDP per capita experienced by each country:
 
@@ -65,6 +85,8 @@ gapminder%>%
   filter(gdpPercap==max(gdpPercap))
 ```
 
+\newpage
+
 Here is a scatterplot showing Canada's life expectancy versus GDP per capita (logged):
 
 ```{r}
@@ -73,6 +95,8 @@ gapminder%>%
   ggplot(aes(lifeExp, log(gdpPercap)))+
   geom_point(size=2, shape=2)
 ```
+
+\newpage
 
 ## Exercise 2
 
@@ -93,8 +117,9 @@ gapminder%>%
   select(country)
 ```
 
+\newpage
 
-We can find out how many countries there are in each continent, with Africa having the highest number of distinct countries and Oceania having the least number of distinct countries.
+We can find out how many countries there are in each continent, with Africa having the highest number of distinct countries (52) and Oceania having the least number of distinct countries (2).
 ```{r}
 gapminder%>%
   group_by(continent)%>%
@@ -108,9 +133,9 @@ gapminder%>%
 
 We can obtain summary statistics for life expectancy, including the mininum value, 1st quartile, median, mean, 3rd quantile and maximum value.
 
-The range for life expectancy is (23.60, 82.60), and its IQR is 22.65.
+The *range* for life expectancy is (23.60, 82.60), and its *IQR* is 22.65.
 
-The mean life expectancy is 59.47 and the median life expectancy is 60.71.
+The *mean* life expectancy is 59.47 and the *median* life expectancy is 60.71.
 
 ```{r}
 gapminder%>%
@@ -139,9 +164,11 @@ gapminder%>%
   summarise(mean(lifeExp))
 ```
 
+\newpage
+
 ## Exercise 3
 
-Let's look at a time series of GDP across time for Singapore. We can notice a positive trend. 
+Let's look at a time series of GDP across time for Singapore. We can notice a positive trend in which GDP is increasing across time. 
 
 ```{r}
 gapminder%>%
@@ -153,6 +180,8 @@ gapminder%>%
 
 ```
 
+\newpage
+
 Let's now look at the relationship between population size and GDP per capita to see if larger countries have an economic advantage. From the scatterplot below though, it seems like this is not the case. Conversely, small countries seem to have an economic advantage.
 
 ```{r}
@@ -161,7 +190,11 @@ gapminder%>%
   geom_point(size=2, shape=23)
 ```
 
-Let's now look at the average GDP per capita for each continent.
+\newpage
+
+Let's now look at the average GDP per capita for each continent.The boxplots have been arranged in order of increasing magnitude to better reflect the differences between continents. Again, we can see that despite having the most number of countries, Africa has the lowest median GDP per capita. On the other hand, despite having the least number of countries, Oceania has the highest median GDP per capita.
+
+It would be good to label the outliers in the boxplots as well, and in the subsequent weeks, I hope I can figure out how to do that.
 
 ```{r}
 gapminder%>%
