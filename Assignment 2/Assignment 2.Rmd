@@ -1,0 +1,175 @@
+---
+title: "Assignment 2"
+author: "Isabel"
+date: "9/19/2019"
+output: html_document
+---
+
+<!---The following chunk allows errors when knitting--->
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+First, load the `gapminder` and `tidyverse` packages. The `dplyr` package will be loaded via the `tidyverse` package. 
+
+```{r load packages, warning = FALSE, message = FALSE}
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(DT))
+# load your packages here:
+
+```
+
+## Exercise 1
+
+Let's first have an overview of the data:
+
+```{r}
+DT::datatable(as_tibble(gapminder))
+```
+
+Let's now focus on the following three countries: Singapore, Malaysia and Indonesia:
+
+```{r}
+filtered<-gapminder%>%
+  filter(year>1969 & year<1980)%>%
+  filter(country %in% c('Singapore', 'Malaysia', 'Indonesia'))
+  
+DT::datatable(filtered)
+  
+```
+
+We now only want the columns 'country' and 'gdpPercap' from the above dataset: 
+
+```{r}
+
+filtered%>%
+  select(country, gdpPercap)
+
+```
+
+We want to see which countries have experienced a drop in life expectancy: 
+
+```{r}
+gapminder%>%
+  mutate(difference=lifeExp-lag(lifeExp, 1))%>%
+  filter(difference<0)%>%
+  filter(year!=1952) # Here I filter out those rows for year=1952 because these do not capture the difference in life expectancy for the same country. 
+
+```
+
+The following shows the maximum GDP per capita experienced by each country:
+
+```{r}
+gapminder%>%
+  group_by(country)%>%
+  filter(gdpPercap==max(gdpPercap))
+```
+
+Here is a scatterplot showing Canada's life expectancy versus GDP per capita (logged):
+
+```{r}
+gapminder%>%
+  filter(country=="Canada")%>%
+  ggplot(aes(lifeExp, log(gdpPercap)))+
+  geom_point(size=2, shape=2)
+```
+
+## Exercise 2
+
+### Exploring countries 
+
+There are 142 distinct countries represented in the gapminder dataset. 
+```{r}
+gapminder%>%
+  distinct(country)
+```
+
+We can randomly select 10 distinct countries to have a feel of the possible values.
+
+```{r}
+gapminder%>%
+  sample_n(10)%>%
+  distinct()%>%
+  select(country)
+```
+
+
+We can find out how many countries there are in each continent, with Africa having the highest number of distinct countries and Oceania having the least number of distinct countries.
+```{r}
+gapminder%>%
+  group_by(continent)%>%
+  mutate(no_of_countries=n()/12)%>%
+  select(continent, no_of_countries)%>%
+  distinct()
+```
+
+
+### Exploring life expectancy
+
+We can obtain summary statistics for life expectancy, including the mininum value, 1st quartile, median, mean, 3rd quantile and maximum value.
+
+The range for life expectancy is (23.60, 82.60), and its IQR is 22.65.
+
+The mean life expectancy is 59.47 and the median life expectancy is 60.71.
+
+```{r}
+gapminder%>%
+  select(lifeExp)%>%
+  summary()
+
+```
+
+The country with the lowest life expectancy is Rwanda in 1992 and the country with the highest is Japan in 2007. 
+
+```{r}
+gapminder%>%
+  filter(lifeExp==min(lifeExp))%>%
+  select(country, year)
+
+gapminder%>%
+  filter(lifeExp==max(lifeExp))%>%
+  select(country, year)
+```
+
+We can also look at which continents have the highest and lowest average life expectancies in the world. Africa has the lowest average life expectancy at 49 years, while Oceania had the highest average life expectancy at 74 years. 
+
+```{r}
+gapminder%>%
+  group_by(continent)%>%
+  summarise(mean(lifeExp))
+```
+
+## Exercise 3
+
+Let's look at a time series of GDP across time for Singapore. We can notice a positive trend. 
+
+```{r}
+gapminder%>%
+  mutate(gdp=gdpPercap*pop)%>%
+  filter(country=="Singapore")%>%
+  ggplot(aes(year, log(gdp)))+
+  geom_line()
+
+
+```
+
+Let's now look at the relationship between population size and GDP per capita to see if larger countries have an economic advantage. From the scatterplot below though, it seems like this is not the case. Conversely, small countries seem to have an economic advantage.
+
+```{r}
+gapminder%>%
+  ggplot(aes(log(pop), log(gdpPercap)))+
+  geom_point(size=2, shape=23)
+```
+
+Let's now look at the average GDP per capita for each continent.
+
+```{r}
+gapminder%>%
+  ggplot(aes(x=reorder(continent, log(gdpPercap), FUN=median), log(gdpPercap)))+
+  geom_boxplot(outlier.colour="red")+
+  xlab("Continent")
+  
+```
+
