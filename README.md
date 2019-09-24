@@ -1,5 +1,5 @@
-# STAT545-participation
-This is the homework repo for [STAT545](https://stat545.stat.ubc.ca). It serves as a folder for projects and assignnments undertaken for STAT545. 
+# STAT545 homework repo for Isabel Chew
+This is Isabel's homework repo for [STAT545](https://stat545.stat.ubc.ca). It serves as a folder for projects and assignnments undertaken for STAT545. 
 
 ![](https://media.tenor.com/images/4499c00cb6446e066b244a7859f695af/tenor.gif)
 
@@ -14,4 +14,10 @@ My name is Isabel and I am a PhD student at the department of Political Science.
 
 ### Navigation
 
-To browse my completed files for the first assignment, please click [here](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%201).
+To browse my completed files for my assignments, please click on the links below.
+
+- [x] [Assignment 1](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%201)
+- [x] [Assignment 2](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%202)
+- [ ] Assignment 3
+- [ ] Assignment 4
+- [ ] Assignment 5
