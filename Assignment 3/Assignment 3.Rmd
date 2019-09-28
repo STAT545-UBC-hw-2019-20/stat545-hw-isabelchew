@@ -1,0 +1,149 @@
+---
+title: "Assignment 3"
+author: "Isabel"
+date: "9/26/2019"
+output:
+  html_document:
+    df_print: paged
+always_allow_html: yes
+---
+
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+
+```
+
+First, load the `gapminder` and `tidyverse` packages. The `dplyr` package will be loaded via the `tidyverse` package. 
+
+```{r load packages, warning = FALSE, message = FALSE}
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(reshape2))
+```
+
+##Task Option 1: Report the absolute or relative abundance of countries with low life expectancy over time by continent  
+
+We will use mean of the worldwide life expectancy as our threshold as it is similar to our median. Because we are interested in both continent and year, the sheer number of rows present in the table doesn't allow us to draw any insights or patterns from the data. Instead, we use a line chart that shows trends in the proportion of countries pr continent that have a life expectancy that's lower than the mean. Using the proportion rather than frequency allows us to directly compare across continents, since the continents are unequal in size. 
+
+```{r}
+
+gapminder%>%
+  summarise(mean(lifeExp), median(lifeExp))
+
+numofcountries <- gapminder%>%
+  group_by(continent, year)%>%
+  mutate(total_countries = length(unique(country)))%>%
+  filter(lifeExp<59.47444)%>%
+  group_by(continent, year)%>%
+  mutate(no_of_countries = length(unique(country)))%>%
+  mutate(proportion = no_of_countries/total_countries)%>%
+  select(continent, year, proportion, no_of_countries, total_countries)%>%
+  as_tibble()
+
+print(numofcountries)
+
+```
+
+One problem that I faced in obtaining this table was that I couldn't filter(lifeExp<mean(lifeExp)). When I did that, it did not filter properly, and I am not sure why. 
+
+When we look at the line graph showing the proportion of countries in each continent that has a lower life expectancy than the overall mean, we see that in 1950, all the countries in Africa had a lower life expectancy than the overall mean. However, this proportion has steadily decreased until the 1990s where it increased slightly before decreasing again. 
+
+In general, this downward trend is repeated in the Americas and Asia, albeit much more drastically and consistently. 
+
+We also notice that countries in Oceania has consistently had a higher life expectancy than the overall mean throughout time.
+
+```{r}
+
+numofcountries%>%ggplot(aes(year, proportion, color=continent))+
+  geom_line()+
+  facet_wrap(~continent, nrow=1)+
+  theme(axis.text.x= element_text(angle=45))+
+  theme(legend.position="none")+
+  ylab("proportion of countries")+
+  ggtitle("Proportion of countries with life expectancies lower than the mean over time")
+
+#To figure out how to remove the legend, since it's unnecessary, I used the code from here: https://stackoverflow.com/questions/35618260/remove-legend-ggplot-2-2
+
+```
+
+##Task Option 2: Get the maximum and minimum of GDP per capita for all continents.
+
+We first create a tibble that shows the maximum and minimum GDP capita for all continents. 
+
+```{r}
+
+minmax<-gapminder%>%
+  group_by(continent)%>%
+  mutate(maximum=max(gdpPercap))%>%
+  mutate(minimum=min(gdpPercap))%>%
+  select(continent, maximum, minimum)%>%
+  distinct()%>%
+  as_tibble()
+
+as_tibble(minmax)
+
+```
+
+We then want to display these statistics visually through the use of a bar chart. Although it was easy to create two separate bar charts, 1 showing the minimum and the other the maximum, I wanted to find a way to combine the two for easier comparison. Initially, I created a bar chart that showed both charts side by side. However, because the y-axis scale is so different, when the two charts are placed side by side, it was almost impossible to see any variation in the bar chart for minimum life expectancy. As such, I decided to place the two bar charts on top of one another - this makes it easier to compare across continents, but also allow retains each graph's y-axis scale. 
+
+From here, we can see that while Asia has one of the lowest minimum GDP per capita, it also has the highest maximum GDP per capita among the different continents. Africa meanwhile, has both the lowest minimum and maximum GDP per capita among the continents.
+
+```{r}
+
+minmax%>%
+  ggplot(aes(continent, minimum))+
+  geom_bar(stat="identity")
+
+minmax%>%
+  ggplot(aes(continent, maximum))+
+  geom_bar(stat="identity")
+
+minmax1<-melt(minmax, id.vars=1)
+minmax1%>%
+  ggplot(aes(continent, value, fill=variable))+
+  geom_col(position="dodge")+
+  facet_wrap(~variable, ncol=1, scales="free_y")+
+  theme(legend.position="none")+
+  ylab("GDP per capita")
+
+#This code was modified from here: https://stackoverflow.com/questions/54413787/how-to-plot-a-2-y-axis-chart-with-bars-side-by-side-without-re-scaling-the-data/54426831#54426831
+
+```
+
+##Task Option 5: How is life expectancy changing over time on different continents? 
+
+We first create a tibble that gives us the mean life expectancy for each continent over time. However, this is again, not the best way to present the information. 
+
+```{r}
+
+lifeExpOT<-gapminder%>%
+  group_by(continent, year)%>%
+  mutate(meanlifeExp=mean(lifeExp))%>%
+  select(continent, year, meanlifeExp)%>%
+  distinct()
+
+as_tibble(lifeExpOT)
+
+```
+
+We use a line chart to show the difference in mean life expectancy for each continent across time. 
+
+Although the default function used a legend for the different lines, I wanted to make it easier to read by appending the continent labels directly to the graph and thereby removing the legend. 
+
+From the graph we can see that across all the continents, mean life expectancies have been increasing over time at approximately the same rate, although in Africa, there was a levelling off of life expectancy during the 1990s. We can see from the graph that Oceania has the highest mean life expectancy, while Africa has by far the lowest mean life expectancy, hovering at around 55 years in 2007.
+
+```{r}
+lifeExpOT%>%ggplot(aes(x=year, y=meanlifeExp, group=continent, color=continent))+
+  geom_line()+
+  theme(legend.position="none")+
+  geom_text(data=lifeExpOT[lifeExpOT$year==2007,], aes(label=continent), nudge_y=1, nudge_x=0.7,size=3, show.legend = FALSE)+
+  ggtitle("Change in mean life expectancy across time")+
+  ylab("Mean life expectancy")
+
+#I modified the code from here to try and figure out how to attach labels to the lines instead of using a legend: https://learnr.wordpress.com/2009/04/29/ggplot2-labelling-data-series-and-adding-a-data-table/
+```
+
+```
+
