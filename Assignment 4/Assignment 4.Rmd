@@ -1,0 +1,92 @@
+---
+title: "Assignment 4"
+author: "Isabel"
+date: "10/2/2019"
+output: html_document
+---
+
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(gapminder)
+library(ggplot2)
+```
+
+```{r allow errors, echo = FALSE}
+knitr::opts_chunk$set(error = TRUE, warning = FALSE)
+```
+
+## Exercise 1: Univariate Data Reshaping 
+
+We want to first take a look at the data. 
+
+```{r}
+gapminder
+```
+
+We now create a tibble with each row representing each year, and columns representing the life expectancies of different countries. 
+
+```{r}
+gapminder_wide <- gapminder %>% 
+  pivot_wider(id_cols = c(year), 
+              names_from = country, 
+              values_from = lifeExp)%>%
+  as_tibble()
+
+gapminder_wide
+```
+
+We now want to plot the life expectancy of Afghanistan against the life expectancy of Albania, both across time, using a scatterplot. 
+
+```{r}
+gapminder_wide%>%
+  ggplot()+
+  geom_point(aes(year, Afghanistan, color="blue"))+
+  geom_point(aes(year, Albania, color="red"))+
+  ylab("Life Expectancy")
+
+#I want to put a legend but I don't know how!
+```
+
+Let's now lengthen the data again. 
+
+```{r}
+
+gapminder_wide%>%
+  pivot_longer(cols= Afghanistan:Zimbabwe,
+               names_to="country",
+               values_to="LifeExp")
+
+```
+
+## Exercise 2: Multivariate Data Reshaping 
+
+We first make a tibble with each row representing one year, and columns for life expectancy and GDP per capita for Boliva, China and Switzerland. 
+
+```{r}
+gapminder_wider <- gapminder %>%
+  filter(country==c("Bolivia", "China", "Switzerland"))%>%
+  pivot_wider(id_cols = c(year), 
+              names_from = country,
+              names_sep = "_",
+              values_from = c(lifeExp, gdpPercap))%>%
+  arrange(year)%>%
+                as_tibble()
+
+gapminder_wider
+
+```
+
+We then re-lengthen the data.
+
+```{r}
+gapminder_wider%>%
+  pivot_longer(cols = -year, 
+               names_to=c(".value", "country"),
+               names_sep="_")
+
+```
+
+## Exercise 3: Table Joins
+
+
