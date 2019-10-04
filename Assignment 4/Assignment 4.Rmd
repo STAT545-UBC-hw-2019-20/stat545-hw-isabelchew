@@ -10,6 +10,7 @@ output: html_document
 library(tidyverse)
 library(gapminder)
 library(ggplot2)
+library(DT)
 ```
 
 ```{r allow errors, echo = FALSE}
@@ -21,7 +22,7 @@ knitr::opts_chunk$set(error = TRUE, warning = FALSE)
 We want to first take a look at the data. 
 
 ```{r}
-gapminder
+datatable(gapminder)
 ```
 
 We now create a tibble with each row representing each year, and columns representing the life expectancies of different countries. 
@@ -33,7 +34,8 @@ gapminder_wide <- gapminder %>%
               values_from = lifeExp)%>%
   as_tibble()
 
-gapminder_wide
+gapminder_wide%>%
+  datatable()
 ```
 
 We now want to plot the life expectancy of Afghanistan against the life expectancy of Albania, both across time, using a scatterplot. 
@@ -57,9 +59,11 @@ Let's now lengthen the data again.
 ```{r}
 
 gapminder_wide%>%
-  pivot_longer(cols= Afghanistan:Zimbabwe,
+  pivot_longer(cols= "Afghanistan":"Zimbabwe",
                names_to="country",
-               values_to="LifeExp")
+               values_to="LifeExp")%>%
+  as_tibble()%>%
+  datatable()
 
 ```
 
@@ -77,7 +81,8 @@ gapminder_wider <- gapminder %>%
   arrange(year)%>%
                 as_tibble()
 
-gapminder_wider
+gapminder_wider%>%
+  datatable()
 
 ```
 
@@ -87,7 +92,8 @@ We then re-lengthen the data.
 gapminder_wider%>%
   pivot_longer(cols = -year, 
                names_to=c(".value", "country"),
-               names_sep="_")
+               names_sep="_")%>%
+  datatable()
 
 ```
 
@@ -109,7 +115,8 @@ email_indvl<-email%>%
 
 guest%>%
   left_join(email_indvl, by="name")%>%
-  as_tibble()
+  as_tibble()%>%
+  datatable()
 ```
 
 I use an anti-join to find out who we have mails for, but are not on the guestlist.
@@ -126,7 +133,8 @@ I then create a guestlist that includes everyone we have emails for (in addition
 guest%>%
   full_join(email_indvl, by="name")%>%
   select(-email)%>%
-  as_tibble()
+  as_tibble()%>%
+  datatable()
 ```
 
 
