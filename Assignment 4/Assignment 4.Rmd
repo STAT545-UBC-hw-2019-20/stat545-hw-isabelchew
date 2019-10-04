@@ -41,11 +41,15 @@ We now want to plot the life expectancy of Afghanistan against the life expectan
 ```{r}
 gapminder_wide%>%
   ggplot()+
-  geom_point(aes(year, Afghanistan, color="blue"))+
-  geom_point(aes(year, Albania, color="red"))+
-  ylab("Life Expectancy")
+  geom_point(aes(year, Afghanistan, color="Afghanistan"))+
+  geom_point(aes(year, Albania, color="Albania"))+
+  ylab("Life Expectancy")+
+  ggtitle("Life Expectancy of Afghanistan and Albania plotted across time")+
+    scale_color_manual("",
+                       breaks=c("Afghanistan", "Albania"),
+                       values=c("red", "blue"))
 
-#I want to put a legend but I don't know how!
+#I wanted to construct a legend without melting the dataset. I took reference from the following website: https://stackoverflow.com/questions/10349206/add-legend-to-ggplot2-line-plot
 ```
 
 Let's now lengthen the data again. 
@@ -88,5 +92,41 @@ gapminder_wider%>%
 ```
 
 ## Exercise 3: Table Joins
+
+```{r}
+guest <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/attend.csv")
+email <- read_csv("https://raw.githubusercontent.com/STAT545-UBC/Classroom/master/data/wedding/emails.csv")
+```
+
+In order to add a new column for email address for each row of guest in the guest list, I first need to modify my email tibble such that every row only has one guest name. Then I want to rename the column 'guest' to 'name' so that I can join the two tibbles. 
+
+```{r}
+
+email_indvl<-email%>%
+  separate_rows(guest, sep = ", ")%>%
+  rename(name=guest)%>%
+  as_tibble()
+
+guest%>%
+  left_join(email_indvl, by="name")%>%
+  as_tibble()
+```
+
+I use an anti-join to find out who we have mails for, but are not on the guestlist.
+
+```{r}
+email_indvl%>%
+  anti_join(guest, by="name")%>%
+  as_tibble()
+```
+
+I then create a guestlist that includes everyone we have emails for (in addition to those on the original guestlist).
+
+```{r}
+guest%>%
+  full_join(email_indvl, by="name")%>%
+  select(-email)%>%
+  as_tibble()
+```
 
 
