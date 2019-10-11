@@ -1,0 +1,27 @@
+---
+title: "Assignment 5"
+author: "Isabel"
+date: "10/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 1
+
+*What's the value of using the here::here package?* 
+
+Rstudio projects allow us to establish a fresh session (with its own environment and packages), and avoid having to set our working directory. 
+
+The here::here package makes it even easier for us to work with Rstudio projects because:
+
+1. It helps us to find the underlying root directory that our project is located in
+2. It helps us to get around the problem of working with different OS: different OS have different ways of writing file pathways - so if you are using a mac but your collaborator is using windows, they will not be able to run your scripts. 
+
+In other words, one of the biggest benefits of using R is that it makes your code more replicable regardless of which computer or R session it is running in. 
+
+## Exercise 2
+
+
