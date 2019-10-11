@@ -19,5 +19,5 @@ To browse my completed files for my assignments, please click on the links below
 - [x] [Assignment 1](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%201)
 - [x] [Assignment 2](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%202)
 - [x] [Assignment 3](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%203)
-- [ ] Assignment 4
+- [x] [Assignment 4](https://github.com/STAT545-UBC-hw-2019-20/stat545-hw-isabelchew/tree/master/Assignment%204)
 - [ ] Assignment 5
