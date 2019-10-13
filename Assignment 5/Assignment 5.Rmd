@@ -2,11 +2,21 @@
 title: "Assignment 5"
 author: "Isabel"
 date: "10/11/2019"
-output: html_document
+output: 
+  html_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages, warning = FALSE, message = FALSE}
+suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(here))
 ```
 
 ## Exercise 1
@@ -24,4 +34,140 @@ In other words, one of the biggest benefits of using R is that it makes your cod
 
 ## Exercise 2
 
+We first ensure that the variable continent is indeed a factor variable. 
+
+```{r}
+class(gapminder$continent)
+```
+
+We then check how  many levels of factors the variable continent has, as well as how many rows of observation the current gapminder dataset has.
+
+```{r}
+nlevels(gapminder$continent)
+
+nrow(gapminder)
+
+```
+
+We plot the mean GDP per capita according to continent. 
+
+```{r}
+gapminder%>%
+  group_by(continent)%>%
+  summarise(mean_gdp=mean(gdpPercap))%>%
+  ggplot() +
+  geom_point(aes(x=continent, y=mean_gdp))+
+  xlab("Continent") + ylab("Mean GDP per capita")+
+  ggtitle("Mean GDP per capita for each continent")+
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+```
+
+Let's now drop Oceania by filtering the gapminder data to remove associations with the continent of Oceania. After doing so, we will check the number of factor levels and observations in the dataset. 
+
+```{r}
+gapminder_filtered<-gapminder%>%
+  filter(continent!="Oceania")
+
+nlevels(gapminder_filtered$continent)
+
+nrow(gapminder_filtered)
+```
+
+We can see that although we have fewer rows in the dataset after filtering out Oceania, the number of factor levels remain the same. Let's now drop the unused factor level. Once we do that, we can see that we only have 4 factor levels  for the variable continent. 
+
+```{r}
+gapminder_filtered_drop<-gapminder_filtered%>%
+  droplevels()
+
+gapminder_filtered_drop$continent %>%
+  nlevels()
+```
+
+When we run the same scatterplot as before, we can see that Oceania is now removed. 
+
+```{r}
+gapminder_filtered_drop%>%
+  group_by(continent)%>%
+  summarise(mean_gdp=mean(gdpPercap))%>%
+  ggplot() +
+  geom_point(aes(x=continent, y=mean_gdp)) +
+  xlab("Continent") + ylab("Mean GDP per capita")+
+  ggtitle("Mean GDP per capita for each continent")+
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+```
+
+Let's look at the median life expectancy for each continent. 
+
+```{r}
+gapminder_filtered_drop%>%
+  group_by(continent)%>%
+  summarise(median_life=median(lifeExp))%>%
+  ggplot() +
+  geom_point(aes(x=continent, y=median_life)) +
+  xlab("Continent") + ylab("Median life expectancy")+
+  ggtitle("Median life expectancy for each continent")+
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+```
+
+Let's reorder the level in ascending order of the median life expectancy. 
+
+```{r}
+gapminder_filtered_drop%>%
+  group_by(continent)%>%
+  summarise(median_life=median(lifeExp))%>%
+  ggplot() +
+  geom_point(aes(fct_relevel(continent, "Africa", "Asia"), y=median_life)) +
+  xlab("Continent") + ylab("Median life expectancy")+
+  ggtitle("Median life expectancy for each continent")+
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+```
+
+## Exercise 3
+
+For this exercise, I will export a modified version of the gapminder dataset and reload it back into R. 
+
+I first modify the gapminder dataset by creating a summarised dataset consisting of the mean life expectancy for each continent. 
+
+```{r}
+gapminder1<-gapminder%>%
+  group_by(continent)%>%
+  summarise(mean_life=mean(lifeExp))
+
+```
+
+I then write it to my disk.
+
+```{r}
+write_csv(gapminder1, here::here("data", "assignment5", "gapminder1.csv"))
+
+```
+
+I now want to reimport it to R.
+
+```{r}
+gapminder_import<-read_csv(here::here("data", "assignment5", "gapminder1.csv"))
+
+gapminder_import
+```
+
+When we reimported the gapminder1 dataset back into R, we noticed that the variable continent was reimported as a character variable. Let's use the forcat package to convert it into a factor variable. 
+
+```{r}
+gapminder_import<-gapminder_import%>%
+  mutate(continent=fct_lump(continent, n=5))
+
+#Let's check to make sure that the variable continent has indeed been converted into a factor with 5 levels
+str(unique(gapminder_import$continent))
+```
+
+Once we have done that, we can now plot a graph showing mean life expectancy across continents. We want to ensure that the continents are ordered in ascending order of mean life expectancy. 
+
+```{r}
+gapminder_import%>%
+  ggplot() +
+  geom_point(aes(fct_relevel(continent, "Africa", "Asia"), mean_life)) +
+  xlab("Continent") + ylab("Mean life expectancy")+
+  ggtitle("Mean life expectancy for each continent")+
+  theme(plot.title=element_text(hjust=0.5, face="bold"))
+```
 
