@@ -17,6 +17,7 @@ suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(reshape2))
 ```
 
 ## Exercise 1
@@ -170,4 +171,73 @@ gapminder_import%>%
   ggtitle("Mean life expectancy for each continent")+
   theme(plot.title=element_text(hjust=0.5, face="bold"))
 ```
+
+## Exercise 4
+
+For a previous exercise, I had constructed a graph that compares the minimum and maximum GDP per capita for each continent. Initially, my graph included two separate plots (1 showing the minimum GDP per capita and the second showing the maximum GDP per capita) stacked on top of one another. However, this made it difficult to compare the minimum and maximum GDP per capita for each continent, and may also be misleading because of the different y-axis scale. 
+
+For instance, if we look at the graphs for Oceania, we might think that the maximum GDP per capita is lower than the minimum GDP per capita. However, this is simply due to the difference y-axis scale used. 
+
+```{r}
+minmax<-gapminder%>%
+  group_by(continent)%>%
+  mutate(maximum=max(gdpPercap))%>%
+  mutate(minimum=min(gdpPercap))%>%
+  select(continent, maximum, minimum)%>%
+  distinct()%>%
+  as_tibble()
+
+minmax1<-melt(minmax, id.vars=1)
+
+minmax1%>%
+  ggplot(aes(continent, value, fill=variable))+
+  geom_col(position="dodge")+
+  facet_wrap(~variable, ncol=1, scales="free_y")+
+  theme(legend.position="none")+
+  ylab("GDP per capita")
+
+```
+
+Another modification I have made since that assignment is that rather than use the melt function from the reshape2 package, I now use the pivot_longer function from the tidyverse package to lengthen my dataset so as to be able to create the type of graph I am interested in. 
+
+My updated graph now allows for comparison of the minimum and maximum GDP per capita not just between continents, but also within continents. Because of the y-axis scale used, it is difficult to make out the values for the minimum GDP per capita. As such, I have done away with the y-axis completely, and labelled the bars directly, so that a consumer of my graph can note down straightaway the value of each bar. 
+
+```{r}
+minmax_long<-minmax%>%
+  pivot_longer(cols=c("maximum", "minimum"), 
+               names_to="min_max",
+               values_to="gdp_per_cap")
+
+graph<-minmax_long%>%
+  ggplot(aes(continent, gdp_per_cap, fill=min_max))+
+  geom_bar(stat="identity", position="dodge")+
+  geom_text(aes(label=round(gdp_per_cap, digits=0)), position=position_dodge(width=0.9), vjust=-0.25)+
+  ggtitle("Minimum & Maximum Mean GDP per capita for each continent")+
+  labs(x="Continent", y="GDP per capita")+
+  scale_fill_discrete(labels=c("Maximum", "Minimum"))+
+  theme(plot.title=element_text(hjust=0.5),
+        panel.grid=element_blank(),
+        panel.background=element_blank(),
+        axis.title.y=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(),
+        legend.title = element_blank())
+
+graph
+
+```
+
+
+## Exercise 5
+
+We want to indicate the plot object in the function because ggsave takes the last graph that was created. Although in this situation it works fine because the last graph created is indeed the plot that we want to save, this can be problematic if we create other graphs prior to running ggsave.
+
+```{r}
+ggsave(here("Assignment 5", "GDPpercap.png"), plot=graph, scale=1.5, width=15, height=10, units=c("cm"))
+
+```
+
+![](/Users/isabelchew/Desktop/STAT545-participation/stat545-hw-isabelchew/Assignment 5/GDPpercap.png)
+
+
 
